@@ -40,21 +40,27 @@ ATXP defines a minimal protocol enabling:
 
 ### 1. Planning Layer (AI Agent)
 
-Generates structured task graphs:
+The agent generates structured task graphs consisting of:
 
 - Tasks
 - Steps
 - Dependencies
 - Commands
 
-### 2. Execution Layer (Terminal)
+---
 
-Executes each step safely and returns:
+### 2. Execution Layer (Terminal Runtime)
+
+The execution system processes each step and returns structured results.
+
+Each step executes one command and returns:
 
 - stdout
 - stderr
+- exit code
 - success/failure status
-- metadata logs
+
+---
 
 ### 3. Feedback Loop
 
@@ -65,25 +71,45 @@ Execution results are returned to the agent for:
 - task refinement
 - continuation of workflow
 
----
-
-## Example Flow
-
-1. Agent generates structured plan  
-2. Execution system runs terminal commands step-by-step  
-3. Results are captured and returned  
-4. Agent refines or continues execution  
-5. Loop repeats until completion
+This creates an iterative execution cycle until completion.
 
 ---
 
-## Goal
+## Execution Rules (Core Contract)
 
-To define a minimal, composable bridge between AI planning systems and real-world execution environments.
+The execution layer MUST follow these deterministic rules:
 
 ---
 
-## Status
+### 1. Atomic Step Execution
 
-Early concept / draft specification  
-Open for iteration and collaboration
+Each step MUST:
+
+- execute exactly one command
+- produce one structured output
+- remain independent unless dependencies are explicitly defined
+
+---
+
+### 2. Deterministic Ordering
+
+Execution order is defined as:
+
+- Steps without dependencies execute in sequence order
+- Steps with dependencies wait for successful completion of required steps
+
+---
+
+### 3. Execution Output Contract
+
+Each step MUST return:
+
+```json
+{
+  "id": 1,
+  "command": "string",
+  "stdout": "string",
+  "stderr": "string",
+  "status": "success | failure",
+  "exit_code": 0
+}
